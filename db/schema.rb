@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_18_010340) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_18_221249) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,6 +42,47 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_18_010340) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "participants", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "raffle_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["raffle_id"], name: "index_participants_on_raffle_id"
+    t.index ["user_id"], name: "index_participants_on_user_id"
+  end
+
+  create_table "prizes", force: :cascade do |t|
+    t.bigint "raffle_id", null: false
+    t.string "name"
+    t.integer "place"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["raffle_id"], name: "index_prizes_on_raffle_id"
+  end
+
+  create_table "raffles", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name"
+    t.string "description"
+    t.datetime "start_date"
+    t.datetime "end_date"
+    t.datetime "drawing_date"
+    t.integer "max_tickets"
+    t.boolean "private"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_raffles_on_user_id"
+  end
+
+  create_table "tickets", force: :cascade do |t|
+    t.bigint "raffle_id", null: false
+    t.bigint "participant_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["participant_id"], name: "index_tickets_on_participant_id"
+    t.index ["raffle_id"], name: "index_tickets_on_raffle_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "full_name"
     t.datetime "created_at", null: false
@@ -59,6 +100,28 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_18_010340) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "winners", force: :cascade do |t|
+    t.bigint "raffle_id", null: false
+    t.bigint "participant_id", null: false
+    t.bigint "prize_id", null: false
+    t.integer "place"
+    t.datetime "drawing_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["participant_id"], name: "index_winners_on_participant_id"
+    t.index ["prize_id"], name: "index_winners_on_prize_id"
+    t.index ["raffle_id"], name: "index_winners_on_raffle_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "participants", "raffles"
+  add_foreign_key "participants", "users"
+  add_foreign_key "prizes", "raffles"
+  add_foreign_key "raffles", "users"
+  add_foreign_key "tickets", "participants"
+  add_foreign_key "tickets", "raffles"
+  add_foreign_key "winners", "participants"
+  add_foreign_key "winners", "prizes"
+  add_foreign_key "winners", "raffles"
 end
