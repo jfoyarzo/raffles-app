@@ -9,4 +9,8 @@ class Raffle < ApplicationRecord
   validates :max_tickets, numericality: { only_integer: true }
   validates :end_date, comparison: { greater_than: :start_date }
   validates :name, length: { in: 5..30 }
+
+  def pick_winners
+    tickets.sample(prizes.count())
+  end
 end
